@@ -89,7 +89,7 @@ def getscoredata(id, metric, order, search, num_scores):
     for score in scores:
         leaderboard = score.get('leaderboard', {})
         song = leaderboard.get('song', {})
-        difficulties = song.get('difficulties', [{}])[0]
+        difficulties = leaderboard.get('difficulty', [{}])
 
         score_data = ScoreData()
         score_data.song_name = song.get('name', '')
