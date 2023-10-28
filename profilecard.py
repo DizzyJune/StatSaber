@@ -199,7 +199,6 @@ async def makecard(profile):
         img_byte_array = BytesIO()
         bg.save(img_byte_array, format="PNG")
         img_byte_array.seek(0)
-        img_byte_array.show()
 
         return img_byte_array
 
