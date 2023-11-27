@@ -164,7 +164,8 @@ async def makecard(profile):
         # Crop PFP to have rounded corners
         resized_target = pfp.resize(mask.size, resample=Image.BILINEAR)
         target_alpha = mask.split()[3]
-        result_image = resized_target.copy().putalpha(target_alpha)
+        result_image = resized_target.copy()
+        result_image.putalpha(target_alpha)
         # Player Icon
         resizedimg = result_image.resize((iconsize, iconsize), resample=Image.BILINEAR)
         shadowresize = shadow.resize(((iconsize + shadowsize), (iconsize + shadowsize)), resample=Image.BILINEAR)
