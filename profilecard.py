@@ -154,7 +154,10 @@ async def makecard(profile):
                 cover = Image.open(coverdata).convert("RGBA")
                 if int(cover.size[0]) / int(cover.size[1]) > 5:
                     cover = cover.crop(((int(cover.size[0] / 8)), 0, (int((cover.size[0] / 6.5) * 2)), cover.size[1]))
-                covercrop = cover.resize((2000, 1100), resample=Image.BILINEAR).filter(ImageFilter.GaussianBlur(5)).crop((0, 0, 2000, 700)).putalpha(coveralpha)
+                coveralph = cover.resize((2000, 1100), resample=Image.BILINEAR)
+                coverfin = coveralph.filter(ImageFilter.GaussianBlur(5))
+                covercrop = coverfin.crop((0, 0, 2000, 700))
+                covercrop.putalpha(coveralpha)
                 coverdark = ImageEnhance.Brightness(covercrop)
                 coverfinal = coverdark.enhance(0.5)
                 bg.paste(coverfinal, (0, 0), coverfinal)
