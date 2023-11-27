@@ -11,6 +11,14 @@ textx, texty = 150, 0
 iconsize = 400
 shadowsize = 40
 iconx, icony, = 100, 200
+# Load Images on Start
+global mask, bgus, shadow, blackbgus, globe, crown
+mask = Image.open("assets/transparencymask.png").convert("RGBA")
+bgus = Image.open("assets/transbg.png").convert("RGBA")
+shadow = Image.open("assets/shadow.png").convert("RGBA")
+blackbgus = Image.open("assets/roundedbgtrans.png").convert("RGBA")
+globe = Image.open("assets/globe.png").convert("RGBA")
+crown = Image.open("assets/crown.png").convert("RGBA")
 
 async def makecard(profile):
 
@@ -124,12 +132,6 @@ async def makecard(profile):
         # Image setups and stuff
         pfpdata = BytesIO(avatarresponse.content)
         pfp = Image.open(pfpdata).convert("RGBA")
-        mask = Image.open("assets/transparencymask.png").convert("RGBA")
-        bgus = Image.open("assets/transbg.png").convert("RGBA")
-        shadow = Image.open("assets/shadow.png").convert("RGBA")
-        blackbgus = Image.open("assets/roundedbgtrans.png").convert("RGBA")
-        globe = Image.open("assets/globe.png").convert("RGBA")
-        crown = Image.open("assets/crown.png").convert("RGBA")
         flag = Image.open(f"assets/flags/{profile.country.lower()}.png").convert("RGBA")
         # Headset Coloring
         if headsetpng == "assets/headsets/vive.png" or headsetpng == "assets/headsets/oculus.png":
