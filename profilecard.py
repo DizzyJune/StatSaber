@@ -14,9 +14,9 @@ iconx, icony, = 100, 200
 # Load Images on Start
 global mask, bgus, shadow, blackbgus, globe, crown
 mask = Image.open("assets/transparencymask.png").convert("RGBA")
-bgus = Image.open("assets/transbg.png").convert("RGBA")
+bg = Image.open("assets/transbg.png").convert("RGBA")
 shadow = Image.open("assets/shadow.png").convert("RGBA")
-blackbgus = Image.open("assets/roundedbgtrans.png").convert("RGBA")
+blackbg = Image.open("assets/roundedbgtrans.png").convert("RGBA")
 globe = Image.open("assets/globe.png").convert("RGBA")
 crown = Image.open("assets/crown.png").convert("RGBA")
 
@@ -143,9 +143,6 @@ async def makecard(profile):
             headset = Image.fromarray(data)
         else:
             headset = Image.open(headsetpng).convert("RGBA")
-        # Make image higher res cuz yeah
-        bg = bgus.resize((2000, 700), resample=Image.BILINEAR)
-        blackbg = blackbgus.resize((2000, 700), resample=Image.BILINEAR)
         if profile.cover is None:
             bg.paste(blackbg, (0, 0), blackbg)
         # Player Cover
@@ -157,18 +154,14 @@ async def makecard(profile):
                 cover = Image.open(coverdata).convert("RGBA")
                 if int(cover.size[0]) / int(cover.size[1]) > 5:
                     cover = cover.crop(((int(cover.size[0] / 8)), 0, (int((cover.size[0] / 6.5) * 2)), cover.size[1]))
-                coveralph = cover.resize((2000, 1100), resample=Image.BILINEAR)
-                coverfin = coveralph.filter(ImageFilter.GaussianBlur(5))
-                covercrop = coverfin.crop((0, 0, 2000, 700))
-                covercrop.putalpha(coveralpha)
+                covercrop = cover.resize((2000, 1100), resample=Image.BILINEAR).filter(ImageFilter.GaussianBlur(5)).crop((0, 0, 2000, 700)).putalpha(coveralpha)
                 coverdark = ImageEnhance.Brightness(covercrop)
                 coverfinal = coverdark.enhance(0.5)
                 bg.paste(coverfinal, (0, 0), coverfinal)
         # Crop PFP to have rounded corners
         resized_target = pfp.resize(mask.size, resample=Image.BILINEAR)
         target_alpha = mask.split()[3]
-        result_image = resized_target.copy()
-        result_image.putalpha(target_alpha)
+        result_image = resized_target.copy().putalpha(target_alpha)
         # Player Icon
         resizedimg = result_image.resize((iconsize, iconsize), resample=Image.BILINEAR)
         shadowresize = shadow.resize(((iconsize + shadowsize), (iconsize + shadowsize)), resample=Image.BILINEAR)
