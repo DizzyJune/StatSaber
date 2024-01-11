@@ -13,7 +13,6 @@ from datetime import *
 import os
 from discord.ui import Button, button, View
 from bsor.Bsor import *
-from keep_alive import keep_alive
 import re
 import io
 from pp import blPpFromAcc
@@ -24,8 +23,8 @@ from profilecard import makecard
 intents = Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents = intents)
-token = os.getenv('bottoken')
-user_agent = "StatSaberBot/v3.3 (Contact me: dizzyjuneee@gmail.com, Discord: @dizzyjune)"
+token = "" #hidden token lol!!!!!
+user_agent = "StatSaberBot/v3.4 (Contact me: dizzyjuneee@gmail.com, Discord: @dizzyjune)"
 
 # Syncing Bot Commands #
 @bot.event
@@ -159,7 +158,7 @@ async def discprofile(interaction: discord.Interaction):
     statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers)
     if statresponse.status_code == 404:
         await interaction.response.send_message(f"No Beatleader account linked to this Discord! Try again after you have linked them at <https://www.beatleader.xyz/signin/socials>.")
-    else:
+    elif statresponse.status_code == 200:
         await interaction.response.defer()
         response = statresponse.json()
         id = response["id"]
@@ -174,12 +173,8 @@ async def discprofile(interaction: discord.Interaction):
         except Exception as e:
             print(e)
             await interaction.followup.send(f"An error has occured! Please try again.", ephemeral = False)
-
-        #embed=discord.Embed(title=f'{profile.player_name} - #{profile.rank} - {round(profile.pp, 2)}pp', url=f"https://www.beatleader.xyz/u/{id}", description=f"**Country Rank** - **#{profile.country_rank}**\n**Top PP** - **{round(profile.top_pp, 2)}pp**\n**Average Accuracy** - **{round(profile.accuracy * 100, 2)}%**\n**Total Score** - **{profile.score:,d}**", color=0x8A4BBE)
-        #embed.set_author(name=profile.player_name, url=f"https://www.beatleader.xyz/u/{id}", icon_url=f"attachment://{profile.country}.png")
-        #embed.set_thumbnail(url=profile.avatar)
-        #file = discord.File(f'flags/{str(profile.country).lower()}.png', filename=f"{profile.country}.png")
-        #await interaction.followup.send(f"Profile for **{profile.player_name}**", ephemeral = False, embed=embed, file=file , view=Buttons(accid = id))
+    else: 
+        await interaction.response.send_message(f"Error code `{statresponse.status_code}`! Please try again.")
 
 # Top Play command #
 @bot.tree.command(name="top", description="Gets the top play using your Discord.")
@@ -191,7 +186,7 @@ async def top(interaction: discord.Interaction, amount: str=''):
  statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers)
  if statresponse.status_code == 404:
      await interaction.response.send_message(f"No Beatleader account linked to this Discord! Try again after you have linked them at <https://www.beatleader.xyz/signin/socials>.")
- else:
+ elif statresponse.status_code == 200:
     await interaction.response.defer()
     response = statresponse.json()
     id = response["id"]
@@ -281,6 +276,8 @@ async def top(interaction: discord.Interaction, amount: str=''):
                     except Exception as e:
                         print(e)
                         await interaction.followup.send(f"An error has occured! Please try again.", ephemeral = False)
+ else:
+     await interaction.response.send_message(f"Error code `{statresponse.status_code}`! Please try again.")
 
 # Recent Play command #
 @bot.tree.command(name="recent", description="Gets the most recent play using your Discord.")
@@ -292,7 +289,7 @@ async def recent(interaction: discord.Interaction, amount: str=''):
  statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers)
  if statresponse.status_code == 404:
      await interaction.response.send_message(f"No Beatleader account linked to this Discord! Try again after you have linked them at <https://www.beatleader.xyz/signin/socials>.")
- else:
+ elif statresponse.status_code == 200:
     await interaction.response.defer()
     response = statresponse.json()
     id = response["id"]
@@ -382,6 +379,8 @@ async def recent(interaction: discord.Interaction, amount: str=''):
                     except Exception as e:
                         print(e)
                         await interaction.followup.send(f"An error has occured! Please try again.", ephemeral = False)
+ else:
+     await interaction.response.send_message(f"Error code `{statresponse.status_code}`! Please try again.")
 
 # Search Plays command #
 @bot.tree.command(name="search", description="Search for a play from a player")
@@ -411,7 +410,7 @@ async def search(interaction: discord.Interaction, sort: discord.app_commands.Ch
  statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers)
  if statresponse.status_code == 404:
      await interaction.response.send_message(f"No Beatleader account linked to this Discord! Try again after you have linked them at <https://www.beatleader.xyz/signin/socials>.")
- else:
+ elif statresponse.status_code == 200:
     await interaction.response.defer()
     response = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers).json()
     id = response["id"]
@@ -502,6 +501,8 @@ async def search(interaction: discord.Interaction, sort: discord.app_commands.Ch
                     except Exception as e:
                         print(e)
                         await interaction.followup.send(f"An error has occured! Please try again.", ephemeral = False)
+ else:
+     await interaction.response.send_message(f"Error code `{statresponse.status_code}`! Please try again.")
 
 # Map Command #
 @bot.tree.command(name="map", description="Shows various information about a map.")
@@ -514,7 +515,7 @@ async def map(interaction: discord.Interaction, key: str):
     mapresponse = requests.get(url=f"https://api.beatleader.xyz/leaderboard/{key}", headers=headers)
     if mapresponse.status_code == 404:
         await interaction.followup.send("No map found, the map key is likely incorrect.")
-    else:
+    elif mapresponse.status_code == 200:
         mapjson = mapresponse.json()
         song = mapjson.get("song", {})
         difficulties = song.get("difficulties", [{}])[0]
@@ -584,275 +585,8 @@ async def map(interaction: discord.Interaction, key: str):
             await interaction.followup.send(f"", ephemeral = False, embed=embed, view=Buttons())
         except Exception as e:
             await interaction.followup.send(f"Error occured! {e}")
-
-# Autoreply to Replay links #
-@bot.event
-async def on_message(message):
-    headers = {
-    "User-Agent": user_agent,
-    }
-    # Global Toggle for replaying to replays #
-    if False:
-        if message.author == 1090059241408184450:
-            return
-        else:
-            if fr"https://replay.beatleader.xyz/?scoreId=" in message.content or fr"https://allpoland.github.io/ArcViewer/?scoreID=" in message.content:
-                text = message.content
-                pattern = fr"https://replay.beatleader.xyz/\?scoreId=(\d+)"
-                match = re.search(pattern, text)
-                if match:
-                    score_id = match.group(1)
-                    score = requests.get(url=f"https://api.beatleader.xyz/score/{score_id}", headers=headers).json()
-                    scoreint = score["modifiedScore"]
-                    acc = score["accuracy"]
-                    badcuts = score["badCuts"]
-                    misses = score["missedNotes"]
-                    bombcuts = score["bombCuts"]
-                    wallhits = score["wallsHit"]
-                    mods = score["modifiers"]
-                    pauses = score["pauses"]
-                    country = score["player"]["country"]
-                    timeset = score["timeset"]
-                    replay = score["replay"]
-                    accid = score["playerId"]
-                    lb = score["leaderboardId"]
-                    playername = score["player"]["name"]
-                    playerrank = score["player"]["rank"]
-                    playerpp = score["player"]["pp"]
-                    lbrank = score["rank"]
-                    topcombo = score["maxCombo"]
-                    pp = score["pp"]
-                    map = requests.get(url=f"https://api.beatleader.xyz/leaderboard/{lb}", headers=headers).json()
-                    song = map["song"]
-                    song_name = song["name"]
-                    diffname = song["difficulties"][0]["difficultyName"]
-                    status = song["difficulties"][0]["status"]
-                    starrating = song["difficulties"][0]["stars"]
-                    song_cover = song["coverImage"]
-                    minutes, seconds = divmod(song["duration"], 60)
-                    length = "%02d:%02d" % (minutes, seconds)
-                    nps = song["difficulties"][0]["nps"]
-                    notecount = song["difficulties"][0]["notes"]
-                    bombcount = song["difficulties"][0]["bombs"]
-                    wallcount = song["difficulties"][0]["walls"]
-                    res = requests.get(url=f'https://www.beatleader.xyz/assets/flags/{country}.png', stream=True, headers=headers)
-                    with open('country.png', 'wb') as f:
-                        shutil.copyfileobj(res.raw, f)
-                    im = Image.open('country.png')
-                    cropped = im.crop(((im.width - im.height) / 2,0,im.width - (im.width - im.height) / 2,im.height))
-                    cropped.save('country.png')
-                    accfull = round(float(acc) * 100, 2)
-                    if accfull >= 100.0:
-                        result = "**SSS**"
-                    elif accfull >= 90.0:
-                        result = "**SS**"
-                    elif accfull >= 80.0:
-                        result = "**S**"
-                    elif accfull >= 65.0:
-                        result = "**A**"
-                    elif accfull >= 50.0:
-                        result = "**B**"
-                    elif accfull >= 35.0:
-                        result = "**C**"
-                    elif accfull >= 20.0:
-                        result = "**D**"
-                    else:
-                        result = "**E**"
-                    accl = result
-                    totalmistakes = int(misses) + int(bombcuts) + int(badcuts) + int(wallhits)
-                    if status == 3:
-                        roundedsr = round(starrating, 2)
-                        soundedsr = float(roundedsr)
-                        sr_display = f"{soundedsr}★"
-                        ppdisplay = f"**{round(pp, 2)}PP** - " 
-                    elif status == 1:
-                        sr_display = "Nominated"
-                        ppdisplay = "\u200b"
-                    elif status == 4:
-                        sr_display = "Unrankable"
-                        ppdisplay = "\u200b"
-                    elif status == 0:
-                        sr_display = "Unranked"
-                        ppdisplay = "\u200b"
-                    else:
-                        sr_display = "Map Status Unknown"
-                        ppdisplay = "\u200b"
-                    if totalmistakes == 0:
-                        mistakesdisplay = "Full Combo!"
-                    else:
-                        mistakesdisplay = f"{totalmistakes} Mistakes"
-                    if mods == "":
-                        newmods = ""
-                    else:
-                        newmods = f' +{mods.replace(",", "")}'
-                    class Buttons(discord.ui.View):
-                        def __init__(self, accid: int, lb: int):
-                            super().__init__()
-                            self.add_item(discord.ui.Button(label="Profile", url = f"https://www.beatleader.xyz/u/{accid}"))
-                            self.add_item(discord.ui.Button(label="Leaderboard", url = f"https://www.beatleader.xyz/leaderboard/global/{lb}/"))
-                    pausetime = ""
-                    if pauses > 0:
-                        if __name__ == '__main__':
-                            pausetimeint = 0
-                            pausetime = ""
-                            offset = score['offsets']['pauses'] - 1
-                            headers = {'Range': 'bytes=' + str(offset) + '-'}
-                            b = requests.get(replay, headers=headers)
-                            bytestream = io.BytesIO(b.content)
-                            p = make_pauses(bytestream)
-                            try:
-                              for p in p:
-                                  pausetimeint += p.duration
-                                  minutes, seconds = divmod (pausetimeint, 60)
-                                  pausetime = "%02d:%02d" % (minutes, seconds)
-                            except BSException as e:
-                              raise
-                    if pauses == 1:
-                        pausetext = "Pause"
-                    else:
-                        pausetext = "Pauses"
-                    if pauses > 0:
-                        pausetime = f" adding up to {pausetime}"
-                    else:
-                        pausetime = ""
-                    embed=discord.Embed(title=f'{song_name} - {diffname.replace("Plus", "+")} - {sr_display}{newmods}', description=f"**{scoreint}** - {ppdisplay}**{accfull}%** - **#{lbrank}**\n**{mistakesdisplay}** - **Top Combo | {topcombo}**\n**{length}** - **{pauses} {pausetext}{pausetime}** - **{round(nps, 2)}NPS**\n**{notecount} Notes** - **{bombcount} Bombs** - **{wallcount} Walls**", color=0x8A4BBE)
-                    embed.set_author(name=f"{playername} - #{playerrank} - {playerpp}pp", url=f"https://www.beatleader.xyz/u/{accid}", icon_url="attachment://country.png")
-                    embed.set_thumbnail(url=song_cover)
-                    embed.set_footer(text=f"Set on")
-                    embed.timestamp = datetime.fromtimestamp(int(timeset))
-                    file = discord.File('country.png', filename="country.png")
-                    try:
-                        await message.channel.send("", reference=message, embed=embed, mention_author=False, view=Buttons(accid, lb), file=file)
-                    except Exception as e:
-                        print(e)
-                elif not match:
-                    pattern2 = fr"https://allpoland.github.io/ArcViewer/\?scoreID=(\d+)"
-                    match = re.search(pattern2, text)
-                    if match:
-                        score_id = match.group(1)
-                    score = requests.get(url=f"https://api.beatleader.xyz/score/{score_id}", headers=headers).json()
-                    scoreint = score["modifiedScore"]
-                    acc = score["accuracy"]
-                    badcuts = score["badCuts"]
-                    misses = score["missedNotes"]
-                    bombcuts = score["bombCuts"]
-                    wallhits = score["wallsHit"]
-                    mods = score["modifiers"]
-                    pauses = score["pauses"]
-                    country = score["player"]["country"]
-                    timeset = score["timeset"]
-                    replay = score["replay"]
-                    accid = score["playerId"]
-                    lb = score["leaderboardId"]
-                    playername = score["player"]["name"]
-                    playerrank = score["player"]["rank"]
-                    playerpp = score["player"]["pp"]
-                    lbrank = score["rank"]
-                    topcombo = score["maxCombo"]
-                    pp = score["pp"]
-                    map = requests.get(url=f"https://api.beatleader.xyz/leaderboard/{lb}", headers=headers).json()
-                    song = map["song"]
-                    song_name = song["name"]
-                    diffname = song["difficulties"][0]["difficultyName"]
-                    status = song["difficulties"][0]["status"]
-                    starrating = song["difficulties"][0]["stars"]
-                    song_cover = song["coverImage"]
-                    minutes, seconds = divmod(song["duration"], 60)
-                    length = "%02d:%02d" % (minutes, seconds)
-                    nps = song["difficulties"][0]["nps"]
-                    notecount = song["difficulties"][0]["notes"]
-                    bombcount = song["difficulties"][0]["bombs"]
-                    wallcount = song["difficulties"][0]["walls"]
-                    res = requests.get(url=f'https://www.beatleader.xyz/assets/flags/{country}.png', stream=True, headers=headers)
-                    with open('country.png', 'wb') as f:
-                        shutil.copyfileobj(res.raw, f)
-                    im = Image.open('country.png')
-                    cropped = im.crop(((im.width - im.height) / 2,0,im.width - (im.width - im.height) / 2,im.height))
-                    cropped.save('country.png')
-                    accfull = round(float(acc) * 100, 2)
-                    if accfull >= 100.0:
-                        result = "**SSS**"
-                    elif accfull >= 90.0:
-                        result = "**SS**"
-                    elif accfull >= 80.0:
-                        result = "**S**"
-                    elif accfull >= 65.0:
-                        result = "**A**"
-                    elif accfull >= 50.0:
-                        result = "**B**"
-                    elif accfull >= 35.0:
-                        result = "**C**"
-                    elif accfull >= 20.0:
-                        result = "**D**"
-                    else:
-                        result = "**E**"
-                    accl = result
-                    totalmistakes = int(misses) + int(bombcuts) + int(badcuts) + int(wallhits)
-                    if status == 3:
-                        roundedsr = round(starrating, 2)
-                        soundedsr = float(roundedsr)
-                        sr_display = f"{soundedsr}★"
-                        ppdisplay = f"**{round(pp, 2)}PP** - " 
-                    elif status == 1:
-                        sr_display = "Nominated"
-                        ppdisplay = "\u200b"
-                    elif status == 4:
-                        sr_display = "Unrankable"
-                        ppdisplay = "\u200b"
-                    elif status == 0:
-                        sr_display = "Unranked"
-                        ppdisplay = "\u200b"
-                    else:
-                        sr_display = "Map Status Unknown"
-                        ppdisplay = "\u200b"
-                    if totalmistakes == 0:
-                        mistakesdisplay = "Full Combo!"
-                    else:
-                        mistakesdisplay = f"{totalmistakes} Mistakes"
-                    if mods == "":
-                        newmods = ""
-                    else:
-                        newmods = f' +{mods.replace(",", "")}'
-                    class Buttons(discord.ui.View):
-                        def __init__(self, accid: int, lb: int):
-                            super().__init__()
-                            self.add_item(discord.ui.Button(label="Profile", url = f"https://www.beatleader.xyz/u/{accid}"))
-                            self.add_item(discord.ui.Button(label="Leaderboard", url = f"https://www.beatleader.xyz/leaderboard/global/{lb}/"))
-                    pausetime = ""
-                    if pauses > 0:
-                        if __name__ == '__main__':
-                            pausetimeint = 0
-                            pausetime = ""
-                            offset = score['offsets']['pauses'] - 1
-                            headers = {'Range': 'bytes=' + str(offset) + '-'}
-                            b = requests.get(replay, headers=headers)
-                            bytestream = io.BytesIO(b.content)
-                            p = make_pauses(bytestream)
-                            try:
-                              for p in p:
-                                  pausetimeint += p.duration
-                                  minutes, seconds = divmod (pausetimeint, 60)
-                                  pausetime = "%02d:%02d" % (minutes, seconds)
-                            except BSException as e:
-                              raise
-                    if pauses == 1:
-                        pausetext = "Pause"
-                    else:
-                        pausetext = "Pauses"
-                    if pauses > 0:
-                        pausetime = f" adding up to {pausetime}"
-                    else:
-                        pausetime = ""
-                    embed=discord.Embed(title=f'{song_name} - {diffname.replace("Plus", "+")} - {sr_display}{newmods}', description=f"**{scoreint}** - {ppdisplay}**{accfull}%** - **#{lbrank}**\n**{mistakesdisplay}** - **Top Combo | {topcombo}**\n**{length}** - **{pauses} {pausetext}{pausetime}** - **{round(nps, 2)}NPS**\n**{notecount} Notes** - **{bombcount} Bombs** - **{wallcount} Walls**", color=0x8A4BBE)
-                    embed.set_author(name=f"{playername} - #{playerrank} - {playerpp}pp", url=f"https://www.beatleader.xyz/u/{accid}", icon_url="attachment://country.png")
-                    embed.set_thumbnail(url=song_cover)
-                    embed.set_footer(text=f"Set on")
-                    embed.timestamp = datetime.fromtimestamp(int(timeset))
-                    file = discord.File('country.png', filename="country.png")
-                    try:
-                        await message.channel.send("", reference=message, embed=embed, mention_author=False, view=Buttons(accid, lb), file=file)
-                    except Exception as e:
-                        print(e)
+    else:
+        await interaction.response.send_message(f"Error code `{mapresponse.status_code}`! Please try again.")
 
 # Owner Commands #
 async def on_message(message):
@@ -861,5 +595,4 @@ async def on_message(message):
             await bot.tree.sync()
 
 # Running the bot #
-keep_alive()
 bot.run(token)
