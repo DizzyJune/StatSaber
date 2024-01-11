@@ -151,11 +151,12 @@ def getscoredata(id, metric, order, search, num_scores):
 
 # Quick profile command #
 @bot.tree.command(name="profile", description="Gets the Beatleader account linked to your Discord.")
-async def discprofile(interaction: discord.Interaction):
+@app_commands.describe(member = "Profile to send.")
+async def discprofile(interaction: discord.Interaction, member: discord.Member):
     headers = {
     "User-Agent": user_agent,
     }
-    statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{interaction.user.id}", headers=headers)
+    statresponse = requests.get(url=f"https://api.beatleader.xyz/player/discord/{member.id}", headers=headers)
     if statresponse.status_code == 404:
         await interaction.response.send_message(f"No Beatleader account linked to this Discord! Try again after you have linked them at <https://www.beatleader.xyz/signin/socials>.")
     elif statresponse.status_code == 200:
@@ -587,12 +588,6 @@ async def map(interaction: discord.Interaction, key: str):
             await interaction.followup.send(f"Error occured! {e}")
     else:
         await interaction.response.send_message(f"Error code `{mapresponse.status_code}`! Please try again.")
-
-# Owner Commands #
-async def on_message(message):
-    if message.author.id == 495795242709286923: # me :3
-        if message.content == '!sync':
-            await bot.tree.sync()
 
 # Running the bot #
 bot.run(token)
